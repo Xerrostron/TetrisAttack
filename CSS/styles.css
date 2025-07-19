@@ -1,0 +1,26 @@
+.playBox{
+  display: flex;
+  flex-wrap: wrap-reverse; /*generate upwards instead of downwards*/
+  flex-direction:row;
+  row-gap: 0;
+  padding: 0;
+  margin: 0;
+  gap: 0; /* No spacing */
+  outline: 8px ridge rgba(45, 145, 70, 0.6);
+  width: 211px; /* 6 * 50px if you're doing 6 columns */
+}
+
+.square{
+     width: 35px;
+     height: 35px;
+     display: inline-block;
+     margin: 0px;
+     font-size: 0px;
+     /*border: 1px solid #000;*/
+}
+/*Concatenate CSS styles by just doing square red*/
+.red    { background-color: red; }
+.blue   { background-color: blue; }
+.yellow { background-color: yellow; }
+.green  { background-color: green; }
+.purple { background-color: purple; }
