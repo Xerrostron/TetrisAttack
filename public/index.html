@@ -8,15 +8,11 @@
 </head>
 <body>
   <h1>Tetris Attack Clone</h1>
-<div class ="gameLoop">
-<div class ="playBox">
-  <div class="square red"></div>
-  <div class="square blue"></div>
-  <div class="square yellow"></div>
-  <div class="square green"></div>
-  <div class="square purple"></div>
+<div style="position: relative; width: 300px; height: 1200px;">
+  <canvas id="gameCanvas" width="300" height="1200" style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+  <canvas id="cursorCanvas" width="300" height="1200" style="position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;"></canvas>
 </div>
-</div>
+
 <script type = "module" src="scripts/gameLoop.js"></script>
 
 </body>
