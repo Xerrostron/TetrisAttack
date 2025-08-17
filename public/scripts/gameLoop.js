@@ -1,49 +1,128 @@
 import{GameBoard} from './gameBoard.js';
-
+import {PlayerCursor} from './cursor.js';
+//initialize game board
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
-// Initialize and draw the game board
 const board = new GameBoard(ctx);
-function drawCursor(ctx, row, col) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  ctx.strokeStyle = 'white';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(col * 50, (23 - row) * 50, 50, 50);         // first square
-  ctx.strokeRect((col + 1) * 50, (23 - row) * 50, 50, 50);   // adjacent square
-}
-function swapPositions(board, ctx) {
-  // Create the button element
-  const swapButton = document.createElement("button");
-  swapButton.textContent = "Swap";
-  
-  // Add it to the page (e.g., inside body or a container)
-  document.body.appendChild(swapButton);
-  
-  // Add a click event listener
-  swapButton.addEventListener("click", () => {
-    // Your swap logic here, e.g. swapping two squares on the board
-    console.log("Swap button clicked!");
-    // Example: swap board[0][0] and board[0][1] colors (you'll adapt to your actual board)
-
-    const sq1 = board[0][0];
-    const sq2 = board[0][1];
-    const tempColor = sq1.color;
-    sq1.color = sq2.color;
-    sq2.color = tempColor;
-    console.log(board[0][0]);
-    // Redraw them if needed
-    sq1.draw(ctx);
-    sq2.draw(ctx);
-  });
-}
-
-// Call the function to create the button
 const cursorContext = document.getElementById("cursorCanvas");
 const cursorCtx = cursorContext.getContext("2d");
-swapPositions(board.board, ctx);
-drawCursor(cursorCtx, 0, 0);
+const cursor = new PlayerCursor(0,1,cursorCtx);
+cursor.drawCursor();
+function dropToIndex(start,end, column, ctx, board, cursor)
+{
+    const difference = start - end;
+    let newStack = [];
+    for(let i = start; i<24; ++i)
+    {//start and end indices are inclusive. start has a real color, end has white
+        console.log("Start: " + start + " End: " + end);
+        console.log("Difference: " + difference);
+        let prevColor = board[i][column].color;
+        board[i][column].color = "white";
+        board[i][column].draw(ctx);
+        console.log("i - difference: " + (i-difference));
+        //new index has the old color of the prev color
+        console.log("Old index with color: " + i + " " + column + " " + prevColor + " to white");
+        console.log("New index with color: " + (i-difference) + " " + column + " " + " to: "+ prevColor);
+        board[i-difference][column].color = prevColor;
+        board[i-difference][column].draw(ctx);
+
+        
+        //cursor.checkVertical((i-difference), column,board[i-difference][column], board, ctx, );
+        //cursor.checkHorizontal((i-difference), column,board[i-difference][column], board, ctx, );
+
+    }
+    console.log("Drop to index completed");
+    //once everything has fallen into place, go ahead and do vertical/horizontal checks
+
+}
+async function applyGravity(ctx, gameBoard, cursor) {
+    try {
+        const board = gameBoard.board;
+        const numRows = board.length;
+        const numCols = board[0].length;
+        
+        for (let i = 0; i < numCols; ++i) {
+            console.log("looking for white counts: column", i);
+
+            let stack = [];
+            let whiteCount = 0;
+            let column = i;
+
+            for (let j = 23; j >= 0; --j) {
+                console.log("Row: " + j);
+                console.log("color: " + board[j][i].color);
+                if (board[j][i].color != "white") {
+                    if (whiteCount != 0) {
+                        let start = stack.pop();
+                        let end = Math.abs(start - whiteCount);
+                        whiteCount = 0;
+                        stack = [];
+                        console.log("Drop to index called");
+                        dropToIndex(start, end, column, ctx, board, cursor);
+                    }
+                    console.log("pushing to stack");
+                    stack.push(j);
+                }
+
+                if (board[j][i].color === "white") {
+                    if (stack.length != 0) {
+                        whiteCount++;
+                        if (j === 0) {
+                            let start = stack.pop();
+                            let end = Math.abs(start - whiteCount);
+                            console.log("Drop to index called");
+                            dropToIndex(start, end, column, ctx, board, cursor);
+                            whiteCount = 0;
+                            stack = [];
+                        }
+                    }
+                }
+            }
+
+            if (whiteCount === 0) {
+                stack = [];
+            }
+        }
+    } catch (err) {
+        console.error("applyGravity error:", err);
+    }
+}
+
+function inputHandler(cursor, board, ctx) {
+    document.addEventListener('keydown', async (e) => { // ✅ async here
+        switch (e.key.toLowerCase()) {
+            case 'w':
+                cursor.moveUp();
+                break;
+            case 's':
+                cursor.moveDown();
+                break;
+            case 'a':
+                cursor.moveLeft();
+                break;
+            case 'd':
+                cursor.moveRight();
+                break;
+            case 'enter':
+                await cursor.swapPositions(board.board, ctx); // ✅ await now valid
+                applyGravity(ctx, board, cursor);       // optionally await this too
+                break;
+        }
+
+        // Redraw cursor after movement
+        cursor.drawCursor();
+    });
+}
+
+
+
+inputHandler(cursor,board, ctx);
+
+// Call the function to create the button
+
+//cursor.swapPositions(board.board, ctx);
+
 
 
 

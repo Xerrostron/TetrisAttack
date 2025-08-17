@@ -8,12 +8,24 @@ export class Square {
   constructor(row, col, color) {
     this.row = row;
     this.col = col;
-    this.color = color;
+    this.logicalColor = color;
+    this.opacity = 1;
+    this.isBreaking = false;
   }
   //color is usually in a string format, hexadecimal format, or any valid CSS color format
-
+  startBreak()
+  {
+    this.isBreaking = true;
+  }
+    update() {
+        if (this.opacity > 0) {
+            this.logicalColor = "black";
+            this.opacity -= 0.05;
+            if (this.opacity < 0) this.opacity = 0;
+        }
+    }
   draw(ctx) {
-    ctx.fillStyle = this.color;
+    ctx.fillStyle = this.logicalColor;
     //x, y, width, height
     //draw with square.draw(ctx)
     //the width of the gameCanvas is 300, 1200
@@ -23,6 +35,14 @@ export class Square {
     let totalRows = this.MAXROWS;
     const flippedRow = totalRows - 1 - this.row;//makes it build bottom up, done through
     //y-axis manipulation!
+    ctx.fillStyle = this.logicalColor;
     ctx.fillRect(this.col * 50, flippedRow * 50, 50, 50);
   }
+  set color(val) {
+        this.logicalColor = val;
+        this.opacity = 1; // reset opacity when assigning new color
+    }
+  get color() {
+    return this.logicalColor;
+}
 }
